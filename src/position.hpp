@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+
 struct SymbolPosition {
   static constexpr int MIN_SYMBOL_LENGTH = 3;
   static constexpr int MAX_SYMBOL_LENGTH = 8;

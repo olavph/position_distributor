@@ -1,7 +1,9 @@
 
 #!/bin/bash
 
-# Run this script from build directory
+# Run this script from build directory.
+# It will start the position distributor server and three clients (Binance, Huobi, Kucoin),
+# with their outputs logged to separate files.
 
 # Paths to binaries
 SERVER_BIN="./position_distributor"

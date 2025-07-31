@@ -31,6 +31,8 @@ void send_periodic(PositionClient &client) {
   }
 }
 
+// Connect a PositionClient to the server and send positions periodically,
+// simulating updates over time.
 int main(int argc, char *argv[]) {
   if (argc < 2) {
     std::cerr << "Usage: " << argv[0] << " <client_id>" << std::endl;
@@ -38,6 +40,7 @@ int main(int argc, char *argv[]) {
   }
   std::string client_id = argv[1];
   boost::asio::io_context ioc;
+  // Connect to a server on the same host
   auto client = std::make_shared<PositionClient>(ioc, "127.0.0.1", 9002, client_id);
   client->connect();
   std::thread sender([&] { send_periodic(*client); });
