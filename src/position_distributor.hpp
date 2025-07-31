@@ -20,7 +20,6 @@ namespace beast = boost::beast;
 namespace websocket = beast::websocket;
 using tcp = asio::ip::tcp;
 
-
 class PositionDistributor {
 public:
   PositionDistributor(asio::io_context &ioc, unsigned short port);
@@ -32,6 +31,7 @@ private:
   void update_client_position(const asio::ip::tcp::endpoint &client_address,
                               SymbolPosition position);
 
+  // Session class to handle individual client connections
   class Session : public std::enable_shared_from_this<Session> {
   public:
     Session(tcp::socket socket, PositionDistributor &distributor);
@@ -48,7 +48,9 @@ private:
 
     websocket::stream<tcp::socket> m_ws;
     PositionDistributor &m_distributor;
+    // Buffer for incoming messages, which are read asynchronously.
     beast::flat_buffer m_buffer;
+    // We cannot call async_write concurrently, so this queue allows the messages to be sequenced.
     std::deque<std::vector<unsigned char>> m_write_queue;
     bool m_write_in_progress{false};
   };
@@ -78,7 +80,7 @@ void PositionDistributor::start() {
 }
 
 void PositionDistributor::create_client_position(const asio::ip::tcp::endpoint &client_address,
-                          const std::string &client_id) {
+                                                 const std::string &client_id) {
   if (m_client_positions.count(client_address) == 0) {
     m_client_positions[client_address] = ClientPosition{client_id, {}};
     std::println("Created new client position for {}", client_id);
@@ -86,7 +88,7 @@ void PositionDistributor::create_client_position(const asio::ip::tcp::endpoint &
 }
 
 void PositionDistributor::update_client_position(const asio::ip::tcp::endpoint &client_address,
-                          SymbolPosition position) {
+                                                 SymbolPosition position) {
   auto &client_position = m_client_positions[client_address];
   client_position.m_positions[position.m_symbol] = position;
   position.m_symbol.append(".");
@@ -136,7 +138,8 @@ void PositionDistributor::Session::on_accept(beast::error_code ec) {
                   beast::bind_front_handler(&Session::on_read_header, shared_from_this()));
 }
 
-void PositionDistributor::Session::on_read_header(beast::error_code ec, std::size_t bytes_transferred) {
+void PositionDistributor::Session::on_read_header(beast::error_code ec,
+                                                  std::size_t bytes_transferred) {
   if (ec) {
     std::println(std::cerr, "Read header failed: {}", ec.message());
     return;

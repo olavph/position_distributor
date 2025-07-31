@@ -2,7 +2,7 @@
 
 This project implements a distributor of positions among strategies.
 
-Each strategy connects to the the distributor (server) via WebSocket.
+Each strategy connects to the the centralized distributor (server) via WebSocket.
 They should send their own position when there is an update for some symbol and they will get broadcasts from all other strategies.
 
 ## Requirements
